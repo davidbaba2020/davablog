@@ -1,6 +1,7 @@
 package com.davablog.davablog.service.serviceImpl;
 
 import com.davablog.davablog.dto.PostDto;
+import com.davablog.davablog.exceptions.ResourceNotFoundException;
 import com.davablog.davablog.model.Post;
 import com.davablog.davablog.repository.PostRepository;
 import com.davablog.davablog.service.PostService;
@@ -36,6 +37,12 @@ public class PostServiceImpl implements PostService {
     public List<PostDto> getAllPosts() {
         List<Post> posts = postRepository.findAll();
         return posts.stream().map(post -> entityMapToDTO(post)).collect(Collectors.toList());
+    }
+
+    @Override
+    public PostDto getPostById(Long id) {
+        Post post = postRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("post", "id", id));
+        return entityMapToDTO(post);
     }
 
 
