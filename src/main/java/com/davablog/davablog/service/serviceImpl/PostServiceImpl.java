@@ -7,6 +7,9 @@ import com.davablog.davablog.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class PostServiceImpl implements PostService {
 
@@ -20,21 +23,39 @@ public class PostServiceImpl implements PostService {
     public PostDto CreatePost(PostDto postDto) {
 
         //Convert DTO to entity
-        Post post = Post.builder()
+        Post post = dtoMapToEntity(postDto);
+        Post newPost = postRepository.save(post);
+
+
+        //Convert entity to DTO
+        PostDto postResponse = entityMapToDTO(post);
+        return postResponse;
+    }
+
+    @Override
+    public List<PostDto> getAllPosts() {
+        List<Post> posts = postRepository.findAll();
+        return posts.stream().map(post -> entityMapToDTO(post)).collect(Collectors.toList());
+    }
+
+
+    private PostDto entityMapToDTO(Post post){
+        PostDto newPostDto = PostDto.builder()
+                .postId(post.getPostId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .description(post.getDescription())
+                .build();
+        return newPostDto;
+    }
+
+    private Post dtoMapToEntity(PostDto postDto){
+        Post newPost = Post.builder()
+                .postId(postDto.getPostId())
                 .title(postDto.getTitle())
                 .content(postDto.getContent())
                 .description(postDto.getDescription())
                 .build();
-
-        Post newPost = postRepository.save(post);
-
-        //Convert entity to DTO
-        PostDto postResponse = PostDto.builder()
-                .title(newPost.getTitle())
-                .content(newPost.getContent())
-                .description(newPost.getDescription())
-                .build();
-
-        return postResponse;
+        return newPost;
     }
 }
